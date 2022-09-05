@@ -2,7 +2,7 @@ const express = require("express");
 
 const Router = express.Router();
 
-const productController = require("../controllers/product");
+const eventController = require("../controllers/event");
 
 // Router.get("/greetings", async (request, response) => {
 // try {
@@ -12,12 +12,12 @@ const productController = require("../controllers/product");
 // }
 // });
 
-// Router.get("/greetings", productController.showGreetings);
+// Router.get("/greetings", eventController.showGreetings);
 // Path Create
 // Path Read
 // Path Update
 // Path Delete
-Router.get("/", productController.getAllProduct);
-Router.get("/:id", productController.getProductById);
-Router.post("/", productController.createProduct);
+Router.get("/", eventController.getAllData);
+Router.get("/:id", eventController.getDataById);
+Router.post("/", eventController.createData);
 module.exports = Router;
