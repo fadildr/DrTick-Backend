@@ -12,7 +12,7 @@ const productController = require("../controllers/product");
 // }
 // });
 
-// Router.get("/greetings", productController.showGreetings);
+Router.get("/greetings", productController.showGreetings);
 // Path Create
 // Path Read
 // Path Update
@@ -20,4 +20,7 @@ const productController = require("../controllers/product");
 Router.get("/", productController.getAllProduct);
 Router.get("/:id", productController.getProductById);
 Router.post("/", productController.createProduct);
+Router.patch("/:id", productController.updateProduct);
+Router.delete("/:id", productController.deleteProduct);
+
 module.exports = Router;

@@ -47,4 +47,33 @@ module.exports = {
           }
         });
     }),
+  updateData: (id, data) =>
+    new Promise((resolve, reject) => {
+      supabase
+        .from("user")
+        .update(data)
+        .match({ userId: id })
+        .then((result) => {
+          if (!result.error) {
+            resolve(result);
+          } else {
+            reject(result);
+          }
+        });
+    }),
+  deleteData: (params) =>
+    new Promise((resolve, reject) => {
+      const { id } = params;
+      supabase
+        .from("user")
+        .delete()
+        .match({ userId: id })
+        .then((result) => {
+          if (!result.error) {
+            resolve(result);
+          } else {
+            reject(result);
+          }
+        });
+    }),
 };

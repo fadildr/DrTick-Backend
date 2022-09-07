@@ -15,18 +15,72 @@ module.exports = {
   //     return wrapper.response(response, status, statusText, errorData);
   //   }
   // },
+  getCountData: () =>
+    new Promise((resolve, reject) => {
+      supabase
+        .from("event")
+        .select("*", { count: "exact" })
+        .then((result) => {
+          if (!result.error) {
+            resolve(result.count);
+          } else {
+            reject(result);
+          }
+        });
+    }),
+  // getAllEvent: (offset, limit) =>
+  //   new Promise((resolve, reject) => {
+  //     // page = 1
+  //     // limit = 10
+  //     // offset = 0
+  //     // .range(0, 9) // offset(0) + limit(10) - 1 = 9
+  //     supabase
+  //       .from("event")
+  //       .select("*")
+  //       .range(offset, offset + limit - 1)
+  //       .then((result) => {
+  //         if (!result.error) {
+  //           resolve(result);
+  //         } else {
+  //           reject(result);
+  //         }
+  //       });
+  // }),
   getAllData: async (request, response) => {
     try {
-      console.log(request.query);
-      const result = await eventModel.getAllData();
+      // console.log(request.query);
+      let { page, limit, name } = request.query;
+      page = +page;
+      limit = +limit;
+
+      const totalData = await eventModel.getCountData();
+      const totalPage = Math.ceil(totalData / limit);
+      const pagination = {
+        // page, totalPage, limit, totalData
+        page,
+        totalPage,
+        limit,
+        totalData,
+      };
+
+      const offset = page * limit - limit;
+
+      const result = await eventModel.getAllData(offset, limit, name);
+      // console.log(result);
       return wrapper.response(
         response,
         result.status,
-        "Success Get Data in event!",
-        result.data
+        "Success Get Data !",
+        result.data,
+        pagination
       );
     } catch (error) {
-      const { status, statusText, error: errorData } = error;
+      // console.log(error);
+      const {
+        status = 500,
+        statusText = "Internal Server Error",
+        error: errorData = null,
+      } = error;
       return wrapper.response(response, status, statusText, errorData);
     }
   },
@@ -66,6 +120,73 @@ module.exports = {
         statusText = "Internal Server Error",
         error: errorData = null,
       } = error;
+      return wrapper.response(response, status, statusText, errorData);
+    }
+  },
+  updateData: async (request, response) => {
+    try {
+      console.log(request.params);
+      console.log(request.body);
+      const { id } = request.params;
+      const { name, category, location, detail, dateTimeShow, price } =
+        request.body;
+
+      // const checkId = await eventModel.getDataById(id);
+
+      // if (checkId.data.length < 1) {
+      //   return wrapper.response(
+      //     response,
+      //     404,
+      //     `Data By Id ${id} Not Found`,
+      //     []
+      //   );
+      // }
+
+      const setData = {
+        name,
+        category,
+        location,
+        detail,
+        dateTimeShow,
+        price,
+      };
+
+      const result = await eventModel.updateData(id, setData);
+
+      return wrapper.response(
+        response,
+        result.status,
+        "Success Update Data",
+        result.data
+      );
+    } catch (error) {
+      const {
+        status = 500,
+        statusText = "Internal Server Error",
+        error: errorData = null,
+      } = error;
+      console.log(error);
+      return wrapper.response(response, status, statusText, errorData);
+    }
+  },
+  deleteData: async (request, response) => {
+    try {
+      console.log(request.params);
+      const result = await eventModel.deleteData(request.params);
+      console.log(result);
+      return wrapper.response(
+        response,
+        result.status,
+        "Success delete Data",
+        result.data
+      );
+    } catch (error) {
+      const {
+        status = 500,
+        statusText = "Internal Server Error",
+        error: errorData = null,
+      } = error;
+      console.log(error);
       return wrapper.response(response, status, statusText, errorData);
     }
   },

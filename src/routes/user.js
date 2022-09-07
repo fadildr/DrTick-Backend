@@ -20,4 +20,6 @@ const userController = require("../controllers/user");
 Router.get("/", userController.getAllData);
 Router.get("/:id", userController.getDataById);
 Router.post("/", userController.createData);
+Router.patch("/:id", userController.updateData);
+Router.delete("/:id", userController.deleteData);
 module.exports = Router;

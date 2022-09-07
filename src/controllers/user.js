@@ -69,4 +69,71 @@ module.exports = {
       return wrapper.response(response, status, statusText, errorData);
     }
   },
+  updateData: async (request, response) => {
+    try {
+      console.log(request.params);
+      console.log(request.body);
+      const { id } = request.params;
+      const { name, username, gender, profession, nationality, dateOfBirth } =
+        request.body;
+
+      // const checkId = await eventModel.getDataById(id);
+
+      // if (checkId.data.length < 1) {
+      //   return wrapper.response(
+      //     response,
+      //     404,
+      //     `Data By Id ${id} Not Found`,
+      //     []
+      //   );
+      // }
+
+      const setData = {
+        name,
+        username,
+        gender,
+        profession,
+        nationality,
+        dateOfBirth,
+      };
+
+      const result = await userModel.updateData(id, setData);
+
+      return wrapper.response(
+        response,
+        result.status,
+        "Success Update Data",
+        result.data
+      );
+    } catch (error) {
+      const {
+        status = 500,
+        statusText = "Internal Server Error",
+        error: errorData = null,
+      } = error;
+      console.log(error);
+      return wrapper.response(response, status, statusText, errorData);
+    }
+  },
+  deleteData: async (request, response) => {
+    try {
+      console.log(request.params);
+      const result = await userModel.deleteData(request.params);
+      console.log(result);
+      return wrapper.response(
+        response,
+        result.status,
+        "Success delete Data",
+        result.data
+      );
+    } catch (error) {
+      const {
+        status = 500,
+        statusText = "Internal Server Error",
+        error: errorData = null,
+      } = error;
+      console.log(error);
+      return wrapper.response(response, status, statusText, errorData);
+    }
+  },
 };
