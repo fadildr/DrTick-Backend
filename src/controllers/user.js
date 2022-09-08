@@ -52,12 +52,33 @@ module.exports = {
   },
   createData: async (request, response) => {
     try {
+      const {
+        name,
+        username,
+        gender,
+        profession,
+        nationality,
+        dateOfBirth,
+        email,
+        password,
+      } = request.body;
+      const setData = {
+        name,
+        username,
+        gender,
+        profession,
+        nationality,
+        dateOfBirth,
+        email,
+        password,
+      };
+      const result = await userModel.createData(setData);
       console.log(request.body);
       return wrapper.response(
         response,
         200,
-        "succes create data user",
-        "hello world"
+        "succes create data booking",
+        result.body
       );
     } catch (error) {
       console.log(error);

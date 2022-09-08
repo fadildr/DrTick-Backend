@@ -17,16 +17,13 @@ module.exports = {
     }),
   getAllData: (offset, limit, name) =>
     new Promise((resolve, reject) => {
-      // page = 1
-      // limit = 10
-      // offset = 0
-      // .range(0, 9) // offset(0) + limit(10) - 1 = 9
       supabase
         .from("event")
         .select("*")
         .range(offset, offset + limit - 1)
-        .textSearch("name", name)
-        .order("created_at", { ascending: false })
+        .ilike("name", `%${name}%`)
+        // .order("created_at", { ascending: true })
+        .order("name", { ascending: true })
         .then((result) => {
           if (!result.error) {
             resolve(result);
@@ -42,7 +39,7 @@ module.exports = {
       supabase
         .from("event")
         .select("*")
-        .eq("id", id)
+        .eq("eventId", id)
         .then((result) => {
           if (!result.error) {
             resolve(result);

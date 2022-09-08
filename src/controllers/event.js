@@ -49,7 +49,7 @@ module.exports = {
   getAllData: async (request, response) => {
     try {
       // console.log(request.query);
-      let { page, limit, name } = request.query;
+      let { page, limit, name, sort } = request.query;
       page = +page;
       limit = +limit;
 
@@ -65,7 +65,7 @@ module.exports = {
 
       const offset = page * limit - limit;
 
-      const result = await eventModel.getAllData(offset, limit, name);
+      const result = await eventModel.getAllData(offset, limit, name, sort);
       // console.log(result);
       return wrapper.response(
         response,
@@ -87,31 +87,33 @@ module.exports = {
   getDataById: async (request, response) => {
     try {
       const { id } = request.params;
-      console.log(id);
-      return wrapper.response(
-        response,
-        200,
-        "succes get data by id in event",
-        "hello world"
-      );
+      const result = await eventModel.getDataById(id);
+      if (result.data.length < 1) {
+        return wrapper.response(response, status, statusText, errorData);
+      }
     } catch (error) {
       console.log(error);
-      const {
-        status = 500,
-        statusText = "Internal Server Error",
-        error: errorData = null,
-      } = error;
-      return wrapper.response(response, status, statusText, errorData);
     }
   },
   createData: async (request, response) => {
     try {
+      const { name, category, location, detail, dateTimeShow, price } =
+        request.body;
+      const setData = {
+        name,
+        category,
+        location,
+        detail,
+        dateTimeShow,
+        price,
+      };
+      const result = await eventModel.createData(setData);
       console.log(request.body);
       return wrapper.response(
         response,
         200,
-        "succes create data in event",
-        "hello world"
+        "succes create data event",
+        result.body
       );
     } catch (error) {
       console.log(error);
@@ -130,17 +132,6 @@ module.exports = {
       const { id } = request.params;
       const { name, category, location, detail, dateTimeShow, price } =
         request.body;
-
-      // const checkId = await eventModel.getDataById(id);
-
-      // if (checkId.data.length < 1) {
-      //   return wrapper.response(
-      //     response,
-      //     404,
-      //     `Data By Id ${id} Not Found`,
-      //     []
-      //   );
-      // }
 
       const setData = {
         name,
