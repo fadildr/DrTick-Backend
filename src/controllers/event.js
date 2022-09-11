@@ -2,19 +2,6 @@ const eventModel = require("../models/event");
 const wrapper = require("../utils/wrapper");
 
 module.exports = {
-  // showGreetings: async (request, response) => {
-  //   try {
-  //     response.status(200).send("Hello World!");
-  //   } catch (error) {
-  //     console.log(error);
-  //     const {
-  //       status = 500,
-  //       statusText = "Internal Server Error",
-  //       error: errorData = null,
-  //     } = error;
-  //     return wrapper.response(response, status, statusText, errorData);
-  //   }
-  // },
   getCountData: () =>
     new Promise((resolve, reject) => {
       supabase
@@ -28,27 +15,8 @@ module.exports = {
           }
         });
     }),
-  // getAllEvent: (offset, limit) =>
-  //   new Promise((resolve, reject) => {
-  //     // page = 1
-  //     // limit = 10
-  //     // offset = 0
-  //     // .range(0, 9) // offset(0) + limit(10) - 1 = 9
-  //     supabase
-  //       .from("event")
-  //       .select("*")
-  //       .range(offset, offset + limit - 1)
-  //       .then((result) => {
-  //         if (!result.error) {
-  //           resolve(result);
-  //         } else {
-  //           reject(result);
-  //         }
-  //       });
-  // }),
   getAllData: async (request, response) => {
     try {
-      // console.log(request.query);
       let { page, limit, name, sort } = request.query;
       page = +page;
       limit = +limit;
@@ -66,7 +34,7 @@ module.exports = {
       const offset = page * limit - limit;
 
       const result = await eventModel.getAllData(offset, limit, name, sort);
-      // console.log(result);
+
       return wrapper.response(
         response,
         result.status,
@@ -75,7 +43,6 @@ module.exports = {
         pagination
       );
     } catch (error) {
-      // console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",
@@ -89,12 +56,23 @@ module.exports = {
       const { id } = request.params;
       const result = await eventModel.getDataById(id);
       if (result.data.length < 1) {
-        return wrapper.response(response, status, statusText, errorData);
+        return wrapper.response(
+          response,
+          200,
+          "succes get data by id",
+          result.data
+        );
       }
     } catch (error) {
-      console.log(error);
+      const {
+        status = 500,
+        statusText = "Internal Server Error",
+        error: errorData = null,
+      } = error;
+      return wrapper.response(response, status, statusText, errorData);
     }
   },
+
   createData: async (request, response) => {
     try {
       const { name, category, location, detail, dateTimeShow, price } =
@@ -140,6 +118,7 @@ module.exports = {
         detail,
         dateTimeShow,
         price,
+        updateAt: "now()",
       };
 
       const result = await eventModel.updateData(id, setData);

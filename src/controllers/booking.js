@@ -59,7 +59,6 @@ module.exports = {
       );
       //   console.log(result.body);
       const allData = { ...result.data[0], section: resultBookingSection };
-      //   console.log(result);
       return wrapper.response(
         response,
         200,

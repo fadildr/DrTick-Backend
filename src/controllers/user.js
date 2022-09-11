@@ -92,8 +92,6 @@ module.exports = {
   },
   updateData: async (request, response) => {
     try {
-      console.log(request.params);
-      console.log(request.body);
       const { id } = request.params;
       const { name, username, gender, profession, nationality, dateOfBirth } =
         request.body;
@@ -116,6 +114,7 @@ module.exports = {
         profession,
         nationality,
         dateOfBirth,
+        updateAt: "now()",
       };
 
       const result = await userModel.updateData(id, setData);

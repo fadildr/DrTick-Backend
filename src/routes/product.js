@@ -3,6 +3,7 @@ const express = require("express");
 const Router = express.Router();
 
 const productController = require("../controllers/product");
+const authMiddleware = require("../middleware/auth");
 
 // Router.get("/greetings", async (request, response) => {
 // try {
@@ -13,6 +14,12 @@ const productController = require("../controllers/product");
 // });
 
 Router.get("/greetings", productController.showGreetings);
+Router.get(
+  "/",
+  authMiddleware.authentication,
+  authMiddleware.authorization,
+  productController.getAllProduct
+);
 // Path Create
 // Path Read
 // Path Update

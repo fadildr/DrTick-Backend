@@ -116,6 +116,7 @@ module.exports = {
         detail,
         dateTimeShow,
         price,
+        updateAt: "now()",
       };
 
       const result = await wishlistModel.updateData(id, setData);
