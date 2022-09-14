@@ -42,4 +42,21 @@ module.exports = {
           }
         });
     }),
+  getBookingSectionByEventId: (id) =>
+    new Promise((resolve, reject) => {
+      // SELECT * FROM product WHERE id = "123"
+      supabase
+        .from("booking")
+        .select(
+          "bookingId, eventId, statusPayment, bookingSection,bookingSection(section)"
+        )
+        .eq("eventId", id)
+        .then((result) => {
+          if (!result.error) {
+            resolve(result);
+          } else {
+            reject(result);
+          }
+        });
+    }),
 };

@@ -15,17 +15,13 @@ module.exports = {
           }
         });
     }),
-  // new Promise(async (resolve, reject) => {
-  //   const result = await supabase.from("product").select("*");
-  //   console.log(result);
-  // }),
   getDataById: (id) =>
     new Promise((resolve, reject) => {
       // SELECT * FROM product WHERE id = "123"
       supabase
         .from("user")
         .select("*")
-        .eq("id", id)
+        .match({ userId: id })
         .then((result) => {
           if (!result.error) {
             resolve(result);
@@ -52,7 +48,7 @@ module.exports = {
       supabase
         .from("user")
         .update(data)
-        .match({ userId: id })
+        .eq("userId", id)
         .then((result) => {
           if (!result.error) {
             resolve(result);

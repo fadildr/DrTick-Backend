@@ -1,7 +1,6 @@
 const express = require("express");
 
 const Router = express.Router();
-
 const productRoutes = require("./product");
 const eventRoutes = require("./event");
 const userRoutes = require("./user");

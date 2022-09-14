@@ -1,11 +1,11 @@
 const jwt = require("jsonwebtoken");
 const authModel = require("../models/auth");
 const wrapper = require("../utils/wrapper");
+const encryptPassword = require("encrypt-password");
 
 module.exports = {
   showGreetings: async (request, response) => {
     try {
-      // return response.status(200).send("Hello World!");
       return wrapper.response(
         response,
         200,
@@ -23,18 +23,36 @@ module.exports = {
   },
   register: async (request, response) => {
     try {
-      const { email, password } = request.body;
+      const { username, email, password } = request.body;
+      const checkEmail = await authModel.getUserByEmail(email);
+      if (checkEmail.data.length > 0) {
+        return wrapper.response(response, 404, "Email Already Use", null);
+      }
+
+      // pass validation
+      if (password.length < 8) {
+        return wrapper.response(
+          response,
+          404,
+          "password minimun 8 character",
+          null
+        );
+      }
+      //encrypt process
+      const encryptedPassword = encryptPassword(password, {
+        min: 8,
+        max: 24,
+        pattern: /^\w{8,24}$/,
+        signature: "signature",
+      });
 
       const setData = {
+        username,
         email,
-        password, // UNTUK PASSWORD BISA DI ENKRIPSI
+        password: encryptedPassword,
       };
 
-      // PROSES PENGECEKAN APAKAH EMAIL YANG MAU DI DAFTARKAN SUDAH ADA ATAU BELUM ?
-
-      // PROSES MENYIMPAN DATA KE DATABASE LEWAT MODEL
       const result = await authModel.register(setData);
-      console.log(request.body);
       return wrapper.response(response, 200, "Success Register", result.body);
     } catch (error) {
       const {
@@ -54,17 +72,16 @@ module.exports = {
       if (checkEmail.data.length < 1) {
         return wrapper.response(response, 404, "Email Not Registed", null);
       }
-
+      const encryptedPassword = encryptPassword(password, {
+        min: 8,
+        max: 24,
+        pattern: /^\w{8,24}$/,
+        signature: "signature",
+      });
       // 2. PROSES PENCOCOKAN PASSWORD
-      if (password !== checkEmail.data[0].password) {
+      if (encryptedPassword !== checkEmail.data[0].password) {
         return wrapper.response(response, 400, "Wrong Password", null);
       }
-
-      // 3. PROSES PEMBUATAN TOKEN JWT
-      // PAYLOAD = DATA YANG MAU DISIMPAN/DIJADIKAN TOKEN
-      // KEY = KATA KUNCI BISA DI GENERATE ATAU DIBUAT LANGSUNG
-      // const payload = checkEmail.data[0];
-      // delete payload.password;
 
       const payload = {
         userId: checkEmail.data[0].userId,
@@ -77,6 +94,21 @@ module.exports = {
         userId: payload.userId,
         token,
       });
+    } catch (error) {
+      const {
+        status = 500,
+        statusText = "Internal Server Error",
+        error: errorData = null,
+      } = error;
+      return wrapper.response(response, status, statusText, errorData);
+    }
+  },
+  logout: async (request, response) => {
+    try {
+      let token = request.headers.authorization;
+      token = token.split(" ")[1];
+      client.setEx(`accessToken:${token}`, 3600 * 48, token);
+      return wrapper.response(response, 200, "Success Logout", null);
     } catch (error) {
       const {
         status = 500,

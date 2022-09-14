@@ -1,5 +1,5 @@
 const supabase = require("../config/supabase");
-const { register } = require("../controllers/auth");
+const register = require("../controllers/auth");
 
 module.exports = {
   showGreetings: () => new Promise((resolve, reject) => {}),

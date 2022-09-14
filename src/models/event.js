@@ -1,7 +1,6 @@
 const supabase = require("../config/supabase");
 
 module.exports = {
-  // showGreetings: () => new Promise((resolve, reject) => {}),
   getCountData: () =>
     new Promise((resolve, reject) => {
       supabase
@@ -15,15 +14,14 @@ module.exports = {
           }
         });
     }),
-  getAllData: (offset, limit, name) =>
+  getAllData: (offset, limit, name, sort, sortType) =>
     new Promise((resolve, reject) => {
       supabase
         .from("event")
         .select("*")
         .range(offset, offset + limit - 1)
         .ilike("name", `%${name}%`)
-        // .order("created_at", { ascending: true })
-        .order("name", { ascending: true })
+        .order(sort, { ascending: sortType })
         .then((result) => {
           if (!result.error) {
             resolve(result);
@@ -35,11 +33,10 @@ module.exports = {
 
   getDataById: (id) =>
     new Promise((resolve, reject) => {
-      // SELECT * FROM product WHERE id = "123"
       supabase
         .from("event")
         .select("*")
-        .eq("eventId", id)
+        .match({ eventId: id })
         .then((result) => {
           if (!result.error) {
             resolve(result);
