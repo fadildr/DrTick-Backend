@@ -3,23 +3,10 @@ const wrapper = require("../utils/wrapper");
 const encryptPassword = require("encrypt-password");
 const cloudinary = require("../config/cloudinary");
 module.exports = {
-  // showGreetings: async (request, response) => {
-  //   try {
-  //     response.status(200).send("Hello World!");
-  //   } catch (error) {
-  //     console.log(error);
-  //     const {
-  //       status = 500,
-  //       statusText = "Internal Server Error",
-  //       error: errorData = null,
-  //     } = error;
-  //     return wrapper.response(response, status, statusText, errorData);
-  //   }
-  // },
-  getAllData: async (request, response) => {
+  getAllUser: async (request, response) => {
     try {
       console.log(request.query);
-      const result = await userModel.getAllData();
+      const result = await userModel.getAllUser();
       return wrapper.response(
         response,
         result.status,
@@ -31,10 +18,10 @@ module.exports = {
       return wrapper.response(response, status, statusText, errorData);
     }
   },
-  getDataById: async (request, response) => {
+  getUserById: async (request, response) => {
     try {
       const { id } = request.params;
-      const result = await userModel.getDataById(id);
+      const result = await userModel.getUserById(id);
       console.log(id);
       return wrapper.response(
         response,
@@ -52,7 +39,7 @@ module.exports = {
       return wrapper.response(response, status, statusText, errorData);
     }
   },
-  createData: async (request, response) => {
+  createUser: async (request, response) => {
     try {
       const {
         name,
@@ -74,7 +61,7 @@ module.exports = {
         email,
         password,
       };
-      const result = await userModel.createData(setData);
+      const result = await userModel.createUser(setData);
       console.log(request.body);
       return wrapper.response(
         response,
@@ -92,7 +79,7 @@ module.exports = {
       return wrapper.response(response, status, statusText, errorData);
     }
   },
-  updateData: async (request, response) => {
+  updateUser: async (request, response) => {
     try {
       const { id } = request.params;
       const {
@@ -116,12 +103,12 @@ module.exports = {
         updateAt: "now()",
       };
 
-      const result = await userModel.updateData(id, setData);
+      const result = await userModel.updateUser(id, setData);
 
       return wrapper.response(
         response,
         result.status,
-        "Success Update Data",
+        "Success Update User",
         result.data
       );
     } catch (error) {
@@ -133,9 +120,9 @@ module.exports = {
       return wrapper.response(response, status, statusText, errorData);
     }
   },
-  deleteData: async (request, response) => {
+  deleteUser: async (request, response) => {
     try {
-      const result = await userModel.deleteData(request.params);
+      const result = await userModel.deleteUser(request.params);
       return wrapper.response(
         response,
         result.status,
@@ -154,8 +141,8 @@ module.exports = {
   updateImage: async (request, response) => {
     try {
       const { id } = request.params;
-      const checkId = await userModel.getDataById(id);
-      console.log(checkId);
+      const checkId = await userModel.getUserById(id);
+
       if (checkId.data.length < 1) {
         return wrapper.response(
           response,
@@ -168,7 +155,6 @@ module.exports = {
       if (request.file) {
         const { filename, mimetype } = request.file;
         image = filename ? `${filename}.${mimetype.split("/")[1]}` : "";
-        // console.log(image);
         // DELETE FILE DI CLOUDINARY
         await cloudinary.uploader.destroy(image, (result) => {
           return result;
@@ -179,7 +165,7 @@ module.exports = {
         image,
         updateAt: "now()",
       };
-      const result = await userModel.updateData(id, setData);
+      const result = await userModel.updateUser(id, setData);
       const filterObj = ["userId", "createdAt", "updatedAt", "image"];
       if (!image) {
         return wrapper.response(res, 401, "you must upload image first", null);
@@ -200,7 +186,6 @@ module.exports = {
         final
       );
     } catch (error) {
-      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",
@@ -213,7 +198,7 @@ module.exports = {
     try {
       const { id } = request.params;
       const { password, newPassword, confirmPassword } = request.body;
-      const checkId = await userModel.getDataById(id);
+      const checkId = await userModel.getUserById(id);
       if (checkId.data.length < 1) {
         return wrapper.response(
           response,
@@ -251,7 +236,7 @@ module.exports = {
       return wrapper.response(
         response,
         result.status,
-        "Success Update Data",
+        "Success Update Password",
         result.data
       );
     } catch (error) {

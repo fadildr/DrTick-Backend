@@ -4,24 +4,13 @@ const Router = express.Router();
 
 const userController = require("../controllers/user");
 const uploadMiddleware = require("../middleware/uploadfile");
-// Router.get("/greetings", async (request, response) => {
-// try {
-//     response.status(200).send("Hello World!");
-// } catch (error) {
-//     console.log(error)
-// }
-// });
+const redisMiddleware = require("../middleware/redis");
 
-// Router.get("/greetings", eventController.showGreetings);
-// Path Create
-// Path Read
-// Path Update
-// Path Delete
-Router.get("/", userController.getAllData);
-Router.get("/:id", userController.getDataById);
-Router.post("/", userController.createData);
-Router.patch("/:id", userController.updateData);
-Router.delete("/:id", userController.deleteData);
+Router.get("/", userController.getAllUser);
+Router.get("/:id", userController.getUserById);
+Router.post("/", userController.createUser);
+Router.patch("/:id", userController.updateUser);
+Router.delete("/:id", userController.deleteUser);
 Router.patch(
   "/updateImage/:id",
   uploadMiddleware.uploadUser,

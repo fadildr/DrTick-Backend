@@ -47,9 +47,7 @@ module.exports = {
       // SELECT * FROM product WHERE id = "123"
       supabase
         .from("booking")
-        .select(
-          "bookingId, eventId, statusPayment, bookingSection,bookingSection(section)"
-        )
+        .select(`bookingId, eventId, statusPayment,bookingSection(section)`)
         .eq("eventId", id)
         .then((result) => {
           if (!result.error) {

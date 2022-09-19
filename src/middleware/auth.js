@@ -23,32 +23,19 @@ module.exports = {
       console.log(error);
     }
   },
-  authorization: async (request, response, next) => {
-    try {
-      let token = request.headers.authorization;
-      token = token.split(" ")[1];
-      // PROSES UNTUK PENGECEKAN ROLE
-      if (request.user.role !== "Admin") {
-        return wrapper.response(
-          response,
-          401,
-          "only admin allowed to do this action",
-          null
-        );
-      }
-      // console.log(request.decodeToken);
-      next();
-    } catch (error) {
-      console.log(error);
-    }
-  },
+
   authorization: async (request, response, next) => {
     try {
       let token = request.headers.authorization;
       token = token.split(" ")[1];
       jwt.verify(token, "RAHASIA", (error, result) => {
         if (result.role === "user") {
-          return wrapper.response(response, 403, "You Not Admin", null);
+          return wrapper.response(
+            response,
+            403,
+            "only admin allowed to do this action",
+            null
+          );
         }
         return next();
       });

@@ -3,6 +3,7 @@ const express = require("express");
 const Router = express.Router();
 
 const bookingController = require("../controllers/booking");
+const redisMiddleware = require("../middleware/redis");
 
 Router.post("/:userId", bookingController.createBooking);
 Router.get("/:id", bookingController.getBookingByUserId);

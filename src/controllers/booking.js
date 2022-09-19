@@ -84,7 +84,7 @@ module.exports = {
       return wrapper.response(
         response,
         200,
-        "succes get data by bookingId",
+        "succes get data by eventId",
         resultSection
       );
     } catch (error) {

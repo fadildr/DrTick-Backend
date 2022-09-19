@@ -24,8 +24,10 @@ module.exports = {
   register: async (request, response) => {
     try {
       const { username, email, password } = request.body;
+      console.log(email);
       const checkEmail = await authModel.getUserByEmail(email);
-      if (checkEmail.data.length > 0) {
+      console.log(checkEmail);
+      if (checkEmail.data.length >= 1) {
         return wrapper.response(response, 404, "Email Already Use", null);
       }
 
@@ -107,9 +109,67 @@ module.exports = {
     try {
       let token = request.headers.authorization;
       token = token.split(" ")[1];
-      client.setEx(`accessToken:${token}`, 3600 * 48, token);
-      return wrapper.response(response, 200, "Success Logout", null);
+      // client.setEx(`accessToken:${token}`, 3600 * 48, token);
+      // client.setEx(`refreshToken:${refreshtoken}`, 3600 * 48, refreshtoken);
+      return wrapper.response(response, 200, "Success Logout", []);
     } catch (error) {
+      const {
+        status = 500,
+        statusText = "Internal Server Error",
+        error: errorData = null,
+      } = error;
+      return wrapper.response(response, status, statusText, errorData);
+    }
+  },
+  refresh: async (request, response) => {
+    try {
+      const { refreshtoken } = request.headers;
+
+      if (!refreshtoken) {
+        return wrapper.response(response, 400, "Refresh Token Must Be Filled");
+      }
+
+      const checkTokenBlacklist = await client.get(
+        `refreshToken:${refreshtoken}`
+      );
+
+      if (checkTokenBlacklist) {
+        return wrapper.response(
+          response,
+          403,
+          "Your token is destroyed please login again",
+          null
+        );
+      }
+
+      let payload;
+      let token;
+      let newRefreshToken;
+
+      jwt.verify(refreshtoken, process.env.REFRESH_KEYS, (error, result) => {
+        if (error) {
+          return wrapper.response(response, 403, error.message, null);
+        }
+        payload = {
+          userId: result.userId,
+          role: result.role,
+        };
+        token = jwt.sign(payload, process.env.ACCESS_KEYS, {
+          expiresIn: "30s",
+        });
+        newRefreshToken = jwt.sign(payload, process.env.REFRESH_KEYS, {
+          expiresIn: "36h",
+        });
+        client.setEx(`refreshToken:${refreshtoken}`, 3600 * 36, refreshtoken);
+      });
+
+      return wrapper.response(response, 200, "Success Refresh Token", {
+        userId: payload.userId,
+        token,
+        refreshToken: newRefreshToken,
+      });
+    } catch (error) {
+      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",

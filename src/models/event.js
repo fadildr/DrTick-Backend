@@ -1,5 +1,4 @@
 const supabase = require("../config/supabase");
-
 module.exports = {
   getCountData: () =>
     new Promise((resolve, reject) => {
@@ -14,24 +13,37 @@ module.exports = {
           }
         });
     }),
-  getAllData: (offset, limit, name, sort, sortType) =>
+  getAllEvent: (offset, limit, name, sortColumn, sortType, day, nextDay) =>
     new Promise((resolve, reject) => {
-      supabase
+      const req = supabase
         .from("event")
         .select("*")
         .range(offset, offset + limit - 1)
         .ilike("name", `%${name}%`)
-        .order(sort, { ascending: sortType })
-        .then((result) => {
+        .order(sortColumn, { ascending: sortType });
+      if (day) {
+        req
+          .gt("dateTimeShow", ` ${day.toISOString()}`)
+          .lt("dateTimeShow", `${nextDay.toISOString()}`)
+          .then((result) => {
+            if (!result.error) {
+              resolve(result);
+            } else {
+              reject(result);
+            }
+          });
+      } else {
+        req.then((result) => {
           if (!result.error) {
             resolve(result);
           } else {
             reject(result);
           }
         });
+      }
     }),
 
-  getDataById: (id) =>
+  getEventById: (id) =>
     new Promise((resolve, reject) => {
       supabase
         .from("event")
@@ -45,7 +57,7 @@ module.exports = {
           }
         });
     }),
-  createData: (data) =>
+  createEvent: (data) =>
     new Promise((resolve, reject) => {
       supabase
         .from("event")
@@ -58,7 +70,7 @@ module.exports = {
           }
         });
     }),
-  updateData: (id, data) =>
+  updateEvent: (id, data) =>
     new Promise((resolve, reject) => {
       supabase
         .from("event")

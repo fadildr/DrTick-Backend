@@ -2,7 +2,7 @@ const wishlistModel = require("../models/wishlist");
 const wrapper = require("../utils/wrapper");
 
 module.exports = {
-  getAllData: async (request, response) => {
+  getAllWishlist: async (request, response) => {
     try {
       // console.log(request.query);
       let { page, limit } = request.query;
@@ -21,7 +21,7 @@ module.exports = {
 
       const offset = page * limit - limit;
       const { userId } = request.query;
-      const result = await wishlistModel.getAllData(offset, limit, userId);
+      const result = await wishlistModel.getAllWishlist(offset, limit, userId);
       // console.log(result);
       return wrapper.response(
         response,
@@ -40,10 +40,10 @@ module.exports = {
       return wrapper.response(response, status, statusText, errorData);
     }
   },
-  getDataById: async (request, response) => {
+  getWishlistById: async (request, response) => {
     try {
       const { id } = request.params;
-      const result = await wishlistModel.getDataById(id);
+      const result = await wishlistModel.getWishlistById(id);
       if (result.data.length < 1) {
         return wrapper.response(response, 404, "data not found", []);
       }
@@ -64,7 +64,7 @@ module.exports = {
       return wrapper.response(response, status, statusText, errorData);
     }
   },
-  createData: async (request, response) => {
+  createWishlist: async (request, response) => {
     try {
       const { eventId, userId } = request.body;
 
@@ -72,7 +72,7 @@ module.exports = {
         eventId,
         userId,
       };
-      const result = await wishlistModel.createData(setData);
+      const result = await wishlistModel.createWishlist(setData);
       //   console.log(request.body);
       return wrapper.response(
         response,
@@ -90,24 +90,13 @@ module.exports = {
       return wrapper.response(response, status, statusText, errorData);
     }
   },
-  updateData: async (request, response) => {
+  updateWishlist: async (request, response) => {
     try {
       console.log(request.params);
       console.log(request.body);
       const { id } = request.params;
       const { name, category, location, detail, dateTimeShow, price } =
         request.body;
-
-      // const checkId = await wishlistModel.getDataById(id);
-
-      // if (checkId.data.length < 1) {
-      //   return wrapper.response(
-      //     response,
-      //     404,
-      //     `Data By Id ${id} Not Found`,
-      //     []
-      //   );
-      // }
 
       const setData = {
         name,
@@ -119,7 +108,7 @@ module.exports = {
         updateAt: "now()",
       };
 
-      const result = await wishlistModel.updateData(id, setData);
+      const result = await wishlistModel.updateWishlist(id, setData);
 
       return wrapper.response(
         response,
@@ -137,10 +126,10 @@ module.exports = {
       return wrapper.response(response, status, statusText, errorData);
     }
   },
-  deleteData: async (request, response) => {
+  deleteDataWishlist: async (request, response) => {
     try {
       console.log(request.params);
-      const result = await wishlistModel.deleteData(request.params);
+      const result = await wishlistModel.deleteDataWishlist(request.params);
       console.log(result);
       return wrapper.response(
         response,

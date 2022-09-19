@@ -3,24 +3,12 @@ const wrapper = require("../utils/wrapper");
 const cloudinary = require("../config/cloudinary");
 const client = require("../config/redis");
 module.exports = {
-  getCountData: () =>
-    new Promise((resolve, reject) => {
-      supabase
-        .from("event")
-        .select("*", { count: "exact" })
-        .then((result) => {
-          if (!result.error) {
-            resolve(result.count);
-          } else {
-            reject(result);
-          }
-        });
-    }),
-  getAllData: async (request, response) => {
+  getAllEvent: async (request, response) => {
     try {
-      let { page, limit, name, sort, sortType } = request.query;
+      let { page, limit, name, sort, dateTimeShow } = request.query;
       page = +page || 1;
       limit = +limit || 5;
+      name = `%${name}%`;
 
       const totalData = await eventModel.getCountData();
       const totalPage = Math.ceil(totalData / limit);
@@ -31,23 +19,42 @@ module.exports = {
         limit,
         totalData,
       };
-      let type;
-      const offset = page * limit - limit;
-      if (sortType.toLowerCase() === "asc") {
-        type = true;
+      let sortColumn = "dateTimeShow";
+      let sortType = "asc";
+      if (sort) {
+        sortColumn = sort.split(" ")[0];
+        sortType = sort.split(" ")[1];
       }
-      if (sortType.toLowerCase() === "dsc") {
-        type = false;
+      if (sortType.toLowerCase() === "asc") {
+        sortType = true;
+      } else {
+        sortType = false;
       }
 
-      const result = await eventModel.getAllData(
+      const offset = page * limit - limit;
+
+      let day;
+      let nextDay;
+      if (dateTimeShow) {
+        day = new Date(dateTimeShow);
+        nextDay = new Date(new Date(day).setDate(day.getDate() + 1));
+      }
+
+      const result = await eventModel.getAllEvent(
         offset,
         limit,
         name,
-        sort,
-        type
+        sortColumn,
+        sortType,
+        day,
+        nextDay
       );
 
+      client.setEx(
+        `getProduct:${JSON.stringify(request.query)}`,
+        3600,
+        JSON.stringify({ result: result.data, pagination })
+      );
       return wrapper.response(
         response,
         result.status,
@@ -65,10 +72,11 @@ module.exports = {
       return wrapper.response(response, status, statusText, errorData);
     }
   },
-  getDataById: async (request, response) => {
+  getEventById: async (request, response) => {
     try {
       const { id } = request.params;
-      const result = await eventModel.getDataById(id);
+      const result = await eventModel.getEventById(id);
+      client.setEx(`getProduct:${id}`, 3600, JSON.stringify(result.data));
       if (result.data.length >= 1) {
         return wrapper.response(
           response,
@@ -87,7 +95,7 @@ module.exports = {
     }
   },
 
-  createData: async (request, response) => {
+  createEvent: async (request, response) => {
     try {
       const { name, category, location, detail, dateTimeShow, price } =
         request.body;
@@ -101,7 +109,7 @@ module.exports = {
         price,
         image: filename ? `${filename}.${mimetype.split("/")[1]}` : "",
       };
-      const result = await eventModel.createData(setData);
+      const result = await eventModel.createEvent(setData);
 
       return wrapper.response(
         response,
@@ -110,7 +118,6 @@ module.exports = {
         result.body
       );
     } catch (error) {
-      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",
@@ -119,12 +126,12 @@ module.exports = {
       return wrapper.response(response, status, statusText, errorData);
     }
   },
-  updateData: async (request, response) => {
+  updateEvent: async (request, response) => {
     try {
       const { id } = request.params;
       const { name, category, location, detail, dateTimeShow, price } =
         request.body;
-      const checkId = await eventModel.getDataById(id);
+      const checkId = await eventModel.getEventById(id);
       if (checkId.data.length < 1) {
         return wrapper.response(
           response,
@@ -153,7 +160,7 @@ module.exports = {
         image,
         updateAt: "now()",
       };
-      const result = await eventModel.updateData(id, setData);
+      const result = await eventModel.updateEvent(id, setData);
 
       return wrapper.response(
         response,
@@ -170,14 +177,21 @@ module.exports = {
       return wrapper.response(response, status, statusText, errorData);
     }
   },
-  deleteData: async (request, response) => {
+  deleteEvent: async (request, response) => {
     try {
-      const result = await eventModel.deleteData(request.params);
+      const result = await eventModel.deleteEvent(request.params);
+      const checkId = await eventModel.getEventById(id);
+      if (checkId.data.length < 1) {
+        return wrapper.response(
+          response,
+          404,
+          `Delete Failed Id ${id} Not Found`,
+          []
+        );
+      }
       let fileName = result.data[0].image.split(".")[0];
       // PROSES DELETE FILE DI CLOUDINARY
-      await cloudinary.uploader.destroy(fileName, (result) => {
-        console.log(result);
-      });
+      await cloudinary.uploader.destroy(fileName, (result) => {});
       return wrapper.response(
         response,
         result.status,

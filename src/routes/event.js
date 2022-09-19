@@ -5,16 +5,31 @@ const Router = express.Router();
 const eventController = require("../controllers/event");
 const authMiddleware = require("../middleware/auth");
 const uploadMiddleware = require("../middleware/uploadfile");
+const redisMiddleware = require("../middleware/redis");
 
-Router.get("/", eventController.getAllData);
-Router.get("/:id", eventController.getDataById);
+Router.get("/", redisMiddleware.getAllEvent, eventController.getAllEvent);
+Router.get("/:id", redisMiddleware.getEventById, eventController.getEventById);
 Router.post(
   "/",
   authMiddleware.authentication,
   authMiddleware.authorization,
   uploadMiddleware.uploadEvent,
-  eventController.createData
+  redisMiddleware.clearEvent,
+  eventController.createEvent
 );
-Router.patch("/:id", uploadMiddleware.uploadEvent, eventController.updateData);
-Router.delete("/:id", eventController.deleteData);
+Router.patch(
+  "/:id",
+  authMiddleware.authentication,
+  authMiddleware.authorization,
+  uploadMiddleware.uploadEvent,
+  redisMiddleware.clearEvent,
+  eventController.updateEvent
+);
+Router.delete(
+  "/:id",
+  authMiddleware.authentication,
+  authMiddleware.authorization,
+  redisMiddleware.clearEvent,
+  eventController.deleteEvent
+);
 module.exports = Router;
