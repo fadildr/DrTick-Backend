@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 require("dotenv").config();
+// console.log(process.env.REDIS_PASSWORD);
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");

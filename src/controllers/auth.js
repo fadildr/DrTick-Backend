@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const authModel = require("../models/auth");
 const wrapper = require("../utils/wrapper");
 const encryptPassword = require("encrypt-password");
-
+const client = require("../config/redis");
 module.exports = {
   showGreetings: async (request, response) => {
     try {
@@ -90,12 +90,19 @@ module.exports = {
         role: !checkEmail.data[0].role ? "user" : checkEmail.data[0].role,
       };
 
-      const token = jwt.sign(payload, "RAHASIA", { expiresIn: "24h" });
+      const token = jwt.sign(payload, process.env.ACCESS_KEYS, {
+        expiresIn: "24h",
+      });
+      const refreshToken = jwt.sign(payload, process.env.REFRESH_KEYS, {
+        expiresIn: "36h",
+      });
       // 4. PROSES REPON KE USER
-      return wrapper.response(response, 200, "Success Login", {
+      const newResult = {
         userId: payload.userId,
         token,
-      });
+        refreshToken,
+      };
+      return wrapper.response(response, 200, "Success Login", newResult);
     } catch (error) {
       const {
         status = 500,
@@ -109,8 +116,8 @@ module.exports = {
     try {
       let token = request.headers.authorization;
       token = token.split(" ")[1];
-      // client.setEx(`accessToken:${token}`, 3600 * 48, token);
-      // client.setEx(`refreshToken:${refreshtoken}`, 3600 * 48, refreshtoken);
+      client.setEx(`accessToken:${token}`, 3600 * 48, token);
+      client.setEx(`refreshToken:${refreshtoken}`, 3600 * 48, refreshtoken);
       return wrapper.response(response, 200, "Success Logout", []);
     } catch (error) {
       const {
@@ -123,10 +130,10 @@ module.exports = {
   },
   refresh: async (request, response) => {
     try {
-      const { refreshtoken } = request.headers;
-
+      const { refreshtoken } = request.body;
+      // console.log;
       if (!refreshtoken) {
-        return wrapper.response(response, 400, "Refresh Token Must Be Filled");
+        return wrapper.response(response, 400, "Refresh Token Is Empty");
       }
 
       const checkTokenBlacklist = await client.get(
@@ -142,9 +149,7 @@ module.exports = {
         );
       }
 
-      let payload;
-      let token;
-      let newRefreshToken;
+      let payload, token, newRefreshToken;
 
       jwt.verify(refreshtoken, process.env.REFRESH_KEYS, (error, result) => {
         if (error) {
@@ -155,18 +160,20 @@ module.exports = {
           role: result.role,
         };
         token = jwt.sign(payload, process.env.ACCESS_KEYS, {
-          expiresIn: "30s",
+          expiresIn: "1h",
         });
         newRefreshToken = jwt.sign(payload, process.env.REFRESH_KEYS, {
           expiresIn: "36h",
         });
         client.setEx(`refreshToken:${refreshtoken}`, 3600 * 36, refreshtoken);
       });
-
-      return wrapper.response(response, 200, "Success Refresh Token", {
+      const newResult = {
         userId: payload.userId,
         token,
         refreshToken: newRefreshToken,
+      };
+      return wrapper.response(response, 200, "Success Refresh Token", {
+        newResult,
       });
     } catch (error) {
       console.log(error);

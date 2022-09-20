@@ -12,7 +12,7 @@ module.exports = {
 
       token = token.split(" ")[1];
 
-      jwt.verify(token, "RAHASIA", (error, result) => {
+      jwt.verify(token, process.env.ACCESS_KEYS, (error, result) => {
         if (error) {
           return wrapper.response(response, 403, error.message, null);
         }
@@ -28,12 +28,12 @@ module.exports = {
     try {
       let token = request.headers.authorization;
       token = token.split(" ")[1];
-      jwt.verify(token, "RAHASIA", (error, result) => {
+      jwt.verify(token, process.env.ACCESS_KEYS, (error, result) => {
         if (result.role === "user") {
           return wrapper.response(
             response,
             403,
-            "only admin allowed to do this action",
+            "Only Admin Can Do This Action",
             null
           );
         }
