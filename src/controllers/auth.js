@@ -130,8 +130,7 @@ module.exports = {
   },
   refresh: async (request, response) => {
     try {
-      const { refreshtoken } = request.body;
-      // console.log;
+      const { refreshtoken } = request.headers;
       if (!refreshtoken) {
         return wrapper.response(response, 400, "Refresh Token Is Empty");
       }
