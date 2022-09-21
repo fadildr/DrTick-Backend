@@ -15,7 +15,7 @@ module.exports = {
           }
         });
     }),
-  getDataById: (id) =>
+  getUserById: (id) =>
     new Promise((resolve, reject) => {
       // SELECT * FROM product WHERE id = "123"
       supabase

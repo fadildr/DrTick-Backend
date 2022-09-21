@@ -179,7 +179,7 @@ module.exports = {
   },
   deleteEvent: async (request, response) => {
     try {
-      const result = await eventModel.deleteEvent(request.params);
+      const { id } = request.params;
       const checkId = await eventModel.getEventById(id);
       if (checkId.data.length < 1) {
         return wrapper.response(
@@ -189,6 +189,7 @@ module.exports = {
           []
         );
       }
+      const result = await eventModel.deleteEvent(request.params);
       let fileName = result.data[0].image.split(".")[0];
       // PROSES DELETE FILE DI CLOUDINARY
       await cloudinary.uploader.destroy(fileName, (result) => {});
@@ -199,6 +200,7 @@ module.exports = {
         result.data
       );
     } catch (error) {
+      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",

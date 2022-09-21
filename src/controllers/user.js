@@ -6,7 +6,7 @@ module.exports = {
   getAllUser: async (request, response) => {
     try {
       console.log(request.query);
-      const result = await userModel.getAllUser();
+      const result = await userModel.getAllData();
       return wrapper.response(
         response,
         result.status,
@@ -22,13 +22,14 @@ module.exports = {
     try {
       const { id } = request.params;
       const result = await userModel.getUserById(id);
-      console.log(id);
-      return wrapper.response(
-        response,
-        200,
-        "succes get data by id user",
-        result.data
-      );
+      if (result.data.length >= 1) {
+        return wrapper.response(
+          response,
+          200,
+          "succes get data by id user",
+          result.data
+        );
+      }
     } catch (error) {
       console.log(error);
       const {
@@ -61,8 +62,7 @@ module.exports = {
         email,
         password,
       };
-      const result = await userModel.createUser(setData);
-      console.log(request.body);
+      const result = await userModel.createData(setData);
       return wrapper.response(
         response,
         200,
@@ -103,7 +103,7 @@ module.exports = {
         updateAt: "now()",
       };
 
-      const result = await userModel.updateUser(id, setData);
+      const result = await userModel.updateData(id, setData);
 
       return wrapper.response(
         response,
@@ -112,6 +112,7 @@ module.exports = {
         result.data
       );
     } catch (error) {
+      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",
@@ -122,7 +123,18 @@ module.exports = {
   },
   deleteUser: async (request, response) => {
     try {
-      const result = await userModel.deleteUser(request.params);
+      const { id } = request.params;
+      const checkId = await userModel.getUserById(id);
+
+      if (checkId.data.length < 1) {
+        return wrapper.response(
+          response,
+          404,
+          `Delete Failed Id ${id} Not Found`,
+          []
+        );
+      }
+      const result = await userModel.deleteData(request.params);
       return wrapper.response(
         response,
         result.status,
@@ -142,12 +154,12 @@ module.exports = {
     try {
       const { id } = request.params;
       const checkId = await userModel.getUserById(id);
-
+      console.log(checkId.data);
       if (checkId.data.length < 1) {
         return wrapper.response(
           response,
-          404,
-          `Update Failed Id ${id} Not Found`,
+          401,
+          `Data By Id ${id} Not Found`,
           []
         );
       }
@@ -160,16 +172,20 @@ module.exports = {
           return result;
         });
       }
-
       const setData = {
         image,
         updateAt: "now()",
       };
-      const result = await userModel.updateUser(id, setData);
       const filterObj = ["userId", "createdAt", "updatedAt", "image"];
       if (!image) {
-        return wrapper.response(res, 401, "you must upload image first", null);
+        return wrapper.response(
+          response,
+          401,
+          "you must upload image first",
+          null
+        );
       }
+      const result = await userModel.updateData(id, setData);
       const final = Object.keys(result.data[0])
         .filter((key) => filterObj.includes(key))
         .reduce(

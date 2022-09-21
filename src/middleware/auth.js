@@ -28,22 +28,18 @@ module.exports = {
     try {
       let token = request.headers.authorization;
       token = token.split(" ")[1];
-      jwt.verify(token, process.env.ACCESS_KEYS, (error, result) => {
-        if (result.role === "user") {
-          return wrapper.response(
-            response,
-            403,
-            "Only Admin Can Do This Action",
-            null
-          );
-        }
-        return next();
-      });
-      // console.log(request.decodeToken);
-      request.decodeToken = result;
-      next();
+      result = request.decodeToken;
+      if (result.role === "user") {
+        return wrapper.response(
+          response,
+          403,
+          "Only Admin Can Do This Action",
+          null
+        );
+      }
+      return next();
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   },
 };

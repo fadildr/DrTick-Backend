@@ -84,7 +84,7 @@ module.exports = {
           }
         });
     }),
-  deleteData: (params) =>
+  deleteEvent: (params) =>
     new Promise((resolve, reject) => {
       const { id } = params;
       supabase
