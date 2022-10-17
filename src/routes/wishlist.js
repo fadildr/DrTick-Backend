@@ -4,7 +4,7 @@ const Router = express.Router();
 
 const wishlistController = require("../controllers/wishlist");
 const authMiddleware = require("../middleware/auth");
-const redisMiddleware = require("../middleware/redis");
+// const redisMiddleware = require("../middleware/redis");
 
 Router.get(
   "/",

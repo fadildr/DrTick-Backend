@@ -15,7 +15,7 @@ module.exports = {
           }
         });
     }),
-  getAllData: (offset, limit, userId) =>
+  getAllWishlist: (offset, limit, userId) =>
     new Promise((resolve, reject) => {
       supabase
         .from("wishlist")
@@ -35,13 +35,16 @@ module.exports = {
   //   const result = await supabase.from("product").select("*");
   //   console.log(result);
   // }),
-  getDataById: (id) =>
+  getWishlistByEventId: (eventId, userId) =>
     new Promise((resolve, reject) => {
-      // SELECT * FROM product WHERE id = "123"
       supabase
         .from("wishlist")
-        .select("*")
-        .match({ wishlistId: id })
+        .select(
+          `*,
+      event(*)`
+        )
+        .eq("eventId", eventId)
+        .eq("userId", userId)
         .then((result) => {
           if (!result.error) {
             resolve(result);
@@ -50,7 +53,7 @@ module.exports = {
           }
         });
     }),
-  createData: (data) =>
+  createWishlist: (data) =>
     new Promise((resolve, reject) => {
       supabase
         .from("wishlist")
@@ -63,7 +66,7 @@ module.exports = {
           }
         });
     }),
-  updateData: (id, data) =>
+  updateWishlist: (id, data) =>
     new Promise((resolve, reject) => {
       supabase
         .from("wishlist")
@@ -77,13 +80,27 @@ module.exports = {
           }
         });
     }),
-  deleteData: (params) =>
+  deleteWishlist: (id) =>
     new Promise((resolve, reject) => {
-      const { id } = params;
       supabase
         .from("wishlist")
         .delete()
         .match({ wishlistId: id })
+        .then((result) => {
+          if (!result.error) {
+            resolve(result);
+          } else {
+            reject(result);
+          }
+        });
+    }),
+  getWishlistByUserId: (id) =>
+    new Promise((resolve, reject) => {
+      // SELECT * FROM product WHERE id = "123"
+      supabase
+        .from("wishlist")
+        .select("*")
+        .match({ userId: id })
         .then((result) => {
           if (!result.error) {
             resolve(result);

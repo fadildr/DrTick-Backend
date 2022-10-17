@@ -2,18 +2,18 @@ const eventModel = require("../models/event");
 const wrapper = require("../utils/wrapper");
 const cloudinary = require("../config/cloudinary");
 const client = require("../config/redis");
+
 module.exports = {
   getAllEvent: async (request, response) => {
     try {
       let { page, limit, name, sort, dateTimeShow } = request.query;
       page = +page || 1;
       limit = +limit || 5;
-      name = `%${name}%`;
+      // name = `%${name}%`;
 
       const totalData = await eventModel.getCountData();
       const totalPage = Math.ceil(totalData / limit);
       const pagination = {
-        // page, totalPage, limit, totalData
         page,
         totalPage,
         limit,
@@ -39,7 +39,7 @@ module.exports = {
         day = new Date(dateTimeShow);
         nextDay = new Date(new Date(day).setDate(day.getDate() + 1));
       }
-
+      console.log(day, nextDay);
       const result = await eventModel.getAllEvent(
         offset,
         limit,
@@ -118,6 +118,7 @@ module.exports = {
         result.body
       );
     } catch (error) {
+      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",
@@ -145,9 +146,7 @@ module.exports = {
         const { filename, mimetype } = request.file;
         image = filename ? `${filename}.${mimetype.split("/")[1]}` : "";
         // DELETE FILE DI CLOUDINARY
-        await cloudinary.uploader.destroy(image, (result) => {
-          return result;
-        });
+        await cloudinary.uploader.destroy(image, (result) => result);
       }
 
       const setData = {
@@ -181,6 +180,7 @@ module.exports = {
     try {
       const { id } = request.params;
       const checkId = await eventModel.getEventById(id);
+
       if (checkId.data.length < 1) {
         return wrapper.response(
           response,
@@ -190,7 +190,7 @@ module.exports = {
         );
       }
       const result = await eventModel.deleteEvent(request.params);
-      let fileName = result.data[0].image.split(".")[0];
+      const fileName = result.data[0].image.split(".")[0];
       // PROSES DELETE FILE DI CLOUDINARY
       await cloudinary.uploader.destroy(fileName, (result) => {});
       return wrapper.response(
@@ -200,7 +200,6 @@ module.exports = {
         result.data
       );
     } catch (error) {
-      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",

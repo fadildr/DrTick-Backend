@@ -1,32 +1,18 @@
 const jwt = require("jsonwebtoken");
+const encryptPassword = require("encrypt-password");
+// const nodemailer = require("nodemailer");
 const authModel = require("../models/auth");
 const wrapper = require("../utils/wrapper");
-const encryptPassword = require("encrypt-password");
 const client = require("../config/redis");
+// const gmail = require("../config/gmail");
+// const { sendMail } = require("../utils/mail");
+
 module.exports = {
-  showGreetings: async (request, response) => {
-    try {
-      return wrapper.response(
-        response,
-        200,
-        "Success Get Greetings",
-        "Hello World !"
-      );
-    } catch (error) {
-      const {
-        status = 500,
-        statusText = "Internal Server Error",
-        error: errorData = null,
-      } = error;
-      return wrapper.response(response, status, statusText, errorData);
-    }
-  },
   register: async (request, response) => {
     try {
       const { username, email, password } = request.body;
-      console.log(email);
       const checkEmail = await authModel.getUserByEmail(email);
-      console.log(checkEmail);
+
       if (checkEmail.data.length >= 1) {
         return wrapper.response(response, 404, "Email Already Use", null);
       }
@@ -40,7 +26,8 @@ module.exports = {
           null
         );
       }
-      //encrypt process
+      // encrypt process
+
       const encryptedPassword = encryptPassword(password, {
         min: 8,
         max: 24,
@@ -55,7 +42,22 @@ module.exports = {
       };
 
       const result = await authModel.register(setData);
-      return wrapper.response(response, 200, "Success Register", result.body);
+      // const setMailOptions = {
+      //   to: email,
+      //   name: username,
+      //   subject: "Email Verification !",
+      //   template: "verificationEmail.html",
+      //   buttonUrl: "http://localhost:3001/api/auth/verif/123456",
+      // };
+
+      // await sendMail(setMailOptions);
+
+      return wrapper.response(
+        response,
+        200,
+        "Success Register Please Check Your Email For Verification",
+        result.body
+      );
     } catch (error) {
       const {
         status = 500,
@@ -152,7 +154,9 @@ module.exports = {
         );
       }
 
-      let payload, token, newRefreshToken;
+      let payload;
+      let token;
+      let newRefreshToken;
 
       jwt.verify(refreshtoken, process.env.REFRESH_KEYS, (error, result) => {
         if (error) {

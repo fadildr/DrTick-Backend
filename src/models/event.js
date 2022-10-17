@@ -1,4 +1,5 @@
 const supabase = require("../config/supabase");
+
 module.exports = {
   getCountData: () =>
     new Promise((resolve, reject) => {

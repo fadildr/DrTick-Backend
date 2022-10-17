@@ -16,20 +16,14 @@ module.exports = {
     const upload = multer({
       storage,
       limits: { fileSize: 512000 },
-      fileFilter: (request, file) => {
-        // const allowedType = ["image/png", "image/jpg", "image/jpeg"];
+      fileFilter: (request, file, callback) => {
+        // let allowedType = ["image/png", "image/jpg", "image/jpeg"];
         if (
           file.mimetype !== "image/png" &&
           file.mimetype !== "image/jpg" &&
           file.mimetype !== "image/jpeg"
-          // file.mimetype !== allowedType
         ) {
-          return wrapper.response(
-            response,
-            401,
-            "Only Upload Image Files",
-            null
-          );
+          return callback(new error("Only Images Are Allowed"));
         }
         callback(null, true);
       },

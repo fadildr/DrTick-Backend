@@ -1,11 +1,11 @@
+const encryptPassword = require("encrypt-password");
 const userModel = require("../models/user");
 const wrapper = require("../utils/wrapper");
-const encryptPassword = require("encrypt-password");
 const cloudinary = require("../config/cloudinary");
+
 module.exports = {
   getAllUser: async (request, response) => {
     try {
-      console.log(request.query);
       const result = await userModel.getAllData();
       return wrapper.response(
         response,
@@ -31,7 +31,6 @@ module.exports = {
         );
       }
     } catch (error) {
-      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",
@@ -51,6 +50,7 @@ module.exports = {
         dateOfBirth,
         email,
         password,
+        phone,
       } = request.body;
       const setData = {
         name,
@@ -61,6 +61,7 @@ module.exports = {
         dateOfBirth,
         email,
         password,
+        phone,
       };
       const result = await userModel.createData(setData);
       return wrapper.response(
@@ -70,7 +71,6 @@ module.exports = {
         result.body
       );
     } catch (error) {
-      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",
@@ -90,6 +90,7 @@ module.exports = {
         nationality,
         dateOfBirth,
         role,
+        phone,
       } = request.body;
 
       const setData = {
@@ -100,6 +101,7 @@ module.exports = {
         nationality,
         dateOfBirth,
         role,
+        phone,
         updateAt: "now()",
       };
 
@@ -112,7 +114,6 @@ module.exports = {
         result.data
       );
     } catch (error) {
-      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",
@@ -154,7 +155,6 @@ module.exports = {
     try {
       const { id } = request.params;
       const checkId = await userModel.getUserById(id);
-      console.log(checkId.data);
       if (checkId.data.length < 1) {
         return wrapper.response(
           response,
@@ -168,9 +168,7 @@ module.exports = {
         const { filename, mimetype } = request.file;
         image = filename ? `${filename}.${mimetype.split("/")[1]}` : "";
         // DELETE FILE DI CLOUDINARY
-        await cloudinary.uploader.destroy(image, (result) => {
-          return result;
-        });
+        await cloudinary.uploader.destroy(image, (result) => result);
       }
       const setData = {
         image,
@@ -202,6 +200,7 @@ module.exports = {
         final
       );
     } catch (error) {
+      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",
@@ -223,7 +222,7 @@ module.exports = {
           []
         );
       }
-      //encrypt password
+      // encrypt password
       const encryptedPassword = encryptPassword(password, {
         min: 8,
         max: 24,

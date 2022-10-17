@@ -17,6 +17,7 @@ module.exports = {
           return wrapper.response(response, 403, error.message, null);
         }
         request.decodeToken = result;
+        console.log(token);
         next();
       });
     } catch (error) {
