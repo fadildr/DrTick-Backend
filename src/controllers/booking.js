@@ -1,12 +1,14 @@
 const bookingModel = require("../models/booking");
 const wrapper = require("../utils/wrapper");
 const groupingSection = require("../utils/groupingSection");
+const snapMidtrans = require("../config/midtrans");
+const { transaction } = require("../config/midtrans");
 
 module.exports = {
   getBookingByUserId: async (request, response) => {
     try {
       const { id } = request.params;
-      console.log(id);
+
       // console.log(data);
       const result = await bookingModel.getBookingByUserId(id);
       return wrapper.response(
@@ -16,7 +18,6 @@ module.exports = {
         result.data
       );
     } catch (error) {
-      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",
@@ -46,8 +47,22 @@ module.exports = {
       };
 
       const result = await bookingModel.createBooking(setBooking);
+      // console.log();
+
       const { bookingId } = result.data[0];
-      //   console.log(request.body);
+      // const totalCost = result.data[0].totalPayment;
+
+      const parameter = {
+        transaction_details: {
+          order_id: bookingId,
+          gross_amount: totalPayment,
+        },
+        credit_card: {
+          secure: true,
+        },
+      };
+      const dataTransaction = await snapMidtrans.createTransaction(parameter);
+
       const resultBookingSection = await Promise.all(
         section.map(async (element) => {
           try {
@@ -58,16 +73,21 @@ module.exports = {
           }
         })
       );
-      //   console.log(result.body);
-      const allData = { ...result.data[0], section: resultBookingSection };
+
+      const allData = {
+        ...result.data[0],
+        ...dataTransaction,
+        section: resultBookingSection,
+        // url: transactionUrl,
+      };
       return wrapper.response(
         response,
         200,
         "succes create data booking",
         allData
+        // transaction
       );
     } catch (error) {
-      console.log(error);
       const {
         status = 500,
         statusText = "Internal Server Error",

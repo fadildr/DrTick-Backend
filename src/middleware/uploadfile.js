@@ -15,7 +15,7 @@ module.exports = {
 
     const upload = multer({
       storage,
-      limits: { fileSize: 512000 },
+      limits: { fileSize: 5000000 },
       fileFilter: (request, file, callback) => {
         // let allowedType = ["image/png", "image/jpg", "image/jpeg"];
         if (
@@ -54,7 +54,7 @@ module.exports = {
 
     const upload = multer({
       storage,
-      limits: { fileSize: 512000 },
+      limits: { fileSize: 5000000 },
       fileFilter: (request, file, callback) => {
         // let allowedType = ["image/png", "image/jpg", "image/jpeg"];
         if (
