@@ -3,8 +3,10 @@ const redis = require("redis");
 const redisPassword = process.env.REDIS_PASWORD;
 const redisHost = process.env.REDIS_HOST;
 const redistPort = process.env.REDIS_PORT;
-
-// // REMOTE : rdcli -h redis-11606.c240.us-east-1-3.ec2.cloud.redislabs.com -a ytCJxzIg640RA0qX5tMC8ciLwx08AS92 -p 11606
+// REDIS_PASSWORD = "i87DyqPhWgZAL9FuDXb2gXCxkDLdJ95r"
+// REDIS_HOST = "redis-16374.c11.us-east-1-2.ec2.cloud.redislabs.com"
+// REDIS_PORT = "16374"
+// // REMOTE : rdcli -h redis-16374.c11.us-east-1-2.ec2.cloud.redislabs.com -a i87DyqPhWgZAL9FuDXb2gXCxkDLdJ95r -p 16374
 
 // const client = redis.createClient();
 const client = redis.createClient({
